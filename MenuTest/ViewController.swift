@@ -14,8 +14,7 @@ class ViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        let menu = MenuView(title: "Menu", theme: LightMenuTheme()) { [weak self] () -> [MenuItem] in
+       let menu = MenuView(image: UIImage(named: "vraaa"), theme: LightMenuTheme()) { [weak self] () -> [MenuItem] in
             return [
                 ShortcutMenuItem(name: "Undo", shortcut: (.command, "Z"), action: {
                     [weak self] in
@@ -38,7 +37,6 @@ class ViewController: UIViewController {
                 ShortcutMenuItem(name: "Help", shortcut: (.command, "?"), action: {}),
             ]
         }
-        
         view.addSubview(menu)
         
         menu.tintColor = .black

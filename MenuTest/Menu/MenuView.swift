@@ -16,6 +16,7 @@ public class MenuView: UIView, MenuThemeable, UIGestureRecognizerDelegate {
     public static let menuWillPresent = Notification.Name("CodeaMenuWillPresent")
     
     private let titleLabel = UILabel()
+    private let imageView = UIImageView()
     private let gestureBarView = UIView()
     private let tintView = UIView()
     private let effectView = UIVisualEffectView(effect: UIBlurEffect(style: .light))
@@ -28,6 +29,12 @@ public class MenuView: UIView, MenuThemeable, UIGestureRecognizerDelegate {
         }
     }
     
+    public var image: UIImage? {
+        didSet {
+            contents?.image = image
+        }
+    }
+
     private var menuPresentationObserver: Any!
     
     private var contents: MenuContents?
@@ -133,6 +140,84 @@ public class MenuView: UIView, MenuThemeable, UIGestureRecognizerDelegate {
         }
     }
     
+    public init(image: UIImage?, theme: MenuTheme, itemsSource: @escaping () -> [MenuItem]) {
+        self.itemsSource = itemsSource
+        self.title = ""
+        self.image = image
+        self.theme = theme
+        
+        super.init(frame: .zero)
+        
+        imageView.image = image
+        
+        let clippingView = UIView()
+        clippingView.clipsToBounds = true
+        
+        addSubview(clippingView)
+        
+        clippingView.snp.makeConstraints {
+            make in
+            
+            make.edges.equalToSuperview()
+        }
+        
+        clippingView.layer.cornerRadius = 8.0
+        
+        clippingView.addSubview(effectView)
+        
+        effectView.snp.makeConstraints {
+            make in
+            
+            make.edges.equalToSuperview()
+        }
+        
+        effectView.contentView.addSubview(tintView)
+        effectView.contentView.addSubview(imageView)
+        effectView.contentView.addSubview(gestureBarView)
+        
+        tintView.snp.makeConstraints {
+            make in
+            
+            make.edges.equalToSuperview()
+        }
+        
+        imageView.snp.makeConstraints {
+            make in
+            
+            make.left.right.equalToSuperview().inset(15)
+            make.centerY.equalToSuperview()
+        }
+        
+        gestureBarView.layer.cornerRadius = 1.0
+        gestureBarView.snp.makeConstraints {
+            make in
+            
+            make.centerX.equalToSuperview()
+            make.height.equalTo(2)
+            make.width.equalTo(20)
+            make.bottom.equalToSuperview().inset(3)
+        }
+        
+        longPress = UILongPressGestureRecognizer(target: self, action: #selector(longPressGesture(_:)))
+        longPress.minimumPressDuration = 0.0
+        longPress.delegate = self
+        addGestureRecognizer(longPress)
+        
+        tapGesture = UITapGestureRecognizer(target: self, action: #selector(tapped(_:)))
+        tapGesture.delegate = self
+        addGestureRecognizer(tapGesture)
+        
+        applyTheme(theme)
+        
+        menuPresentationObserver = NotificationCenter.default.addObserver(forName: MenuView.menuWillPresent, object: nil, queue: nil) {
+            [weak self] notification in
+            
+            if let poster = notification.object as? MenuView, let this = self, poster !== this {
+                self?.hideContents(animated: false)
+            }
+        }
+    }
+
     deinit {
         NotificationCenter.default.removeObserver(menuPresentationObserver)
     }
@@ -217,7 +302,12 @@ public class MenuView: UIView, MenuThemeable, UIGestureRecognizerDelegate {
     public func showContents() {
         NotificationCenter.default.post(name: MenuView.menuWillPresent, object: self)
         
-        let contents = MenuContents(name: title, items: itemsSource(), theme: theme)
+        let contents: MenuContents
+        if image != nil {
+            contents = MenuContents(image: image, items: itemsSource(), theme: theme)
+        }else {
+            contents = MenuContents(name: title, items: itemsSource(), theme: theme)
+        }
         
         for view in contents.stackView.arrangedSubviews {
             if let view = view as? MenuItemView {

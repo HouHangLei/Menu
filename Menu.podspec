@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |spec|
   spec.name         = "Menu"
-  spec.version      = "0.0.1"
+  spec.version      = "0.0.2"
   spec.summary      = "The iOS Menu."
 
   # This description is used to generate tags and improve search results.
@@ -20,7 +20,7 @@ Pod::Spec.new do |spec|
     The iOS Menu is a macOS style menu framework for iOS. It provides gesture and tap-based access to menu items, support for keyboard shortcuts, and a themeable, iOS-inspired design.
   DESC
 
-  spec.homepage     = "https://github.com/TwoLivesLeft/Menu"
+  spec.homepage     = "https://github.com/HouHangLei/Menu"
   spec.screenshots  = "https://codea.io/blog/wp-content/uploads/2019/01/clipboard-3.png", "https://codea.io/blog/wp-content/uploads/2019/01/Image-2-1024x654.png"
 
   spec.license      = { :type => "MIT", :file => "LICENSE" }
@@ -31,7 +31,7 @@ Pod::Spec.new do |spec|
   spec.platform     = :ios, "10.0"
   # spec.ios.deployment_target = "10.0"
 
-  spec.source       = { :git => "https://github.com/TwoLivesLeft/Menu.git", :tag => "#{spec.version}" }
+  spec.source       = { :git => "https://github.com/HouHangLei/Menu.git", :tag => "#{spec.version}" }
   spec.source_files  = "MenuTest/Menu/*.swift", "MenuTest/Util/*.swift"
   spec.swift_version = '4.2'
 

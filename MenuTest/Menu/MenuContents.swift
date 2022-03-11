@@ -31,7 +31,8 @@ class MenuContents: UIView {
     let stackView: UIStackView
     
     private let titleLabel = UILabel()
-    
+    private let imageView = UIImageView()
+
     private let radius: CGFloat
     
     private var edgeScrollTimer: Timer?
@@ -59,6 +60,15 @@ class MenuContents: UIView {
         }
     }
     
+    var image: UIImage? {
+        get {
+            return imageView.image
+        }
+        set {
+            imageView.image = newValue
+        }
+    }
+
     var highlightedPosition: CGPoint? {
         didSet {
             let pos = highlightedPosition ?? CGPoint(x: CGFloat.infinity, y: CGFloat.infinity)
@@ -244,6 +254,93 @@ class MenuContents: UIView {
         applyTheme(theme)
     }
     
+    init(image: UIImage?, items: [MenuItem], theme: MenuTheme, maxHeight: CGFloat = 300, radius: CGFloat = 8.0) {
+
+        let itemViews: [MenuViewType] = items.map {
+            let item = $0.view
+            item.applyTheme(theme)
+            return item
+        }
+        
+        stackView = UIStackView(arrangedSubviews: itemViews)
+        
+        self.maxHeight = maxHeight
+        self.items = items
+        self.radius = radius
+        
+        super.init(frame: .zero)
+        
+        imageView.image = image
+        
+        addSubview(shadowView)
+        
+        shadowView.snp.makeConstraints {
+            make in
+            
+            make.edges.equalToSuperview().inset(-20)
+        }
+        
+        addSubview(effectView)
+        
+        effectView.snp.makeConstraints {
+            make in
+            
+            make.edges.equalToSuperview()
+        }
+        
+        effectView.contentView.addSubview(tintView)
+        effectView.contentView.addSubview(imageView)
+        effectView.contentView.addSubview(scrollContainer)
+        
+        scrollContainer.addSubview(scrollView)
+        scrollView.addSubview(stackView)
+        
+        scrollContainer.snp.makeConstraints {
+            make in
+            make.edges.equalToSuperview()
+        }
+        
+        scrollView.snp.makeConstraints {
+            make in
+            
+            make.edges.equalToSuperview()
+            make.height.equalTo(maxHeight)
+        }
+        
+        tintView.snp.makeConstraints {
+            make in
+            
+            make.edges.equalToSuperview()
+        }
+        
+        stackView.snp.makeConstraints {
+            make in
+            
+            make.top.bottom.equalToSuperview()
+            if #available(iOS 11.0, *) {
+                make.left.right.equalTo(scrollView.frameLayoutGuide)
+            } else {
+                make.left.right.equalTo(self)
+            }
+        }
+        
+        stackView.axis = .vertical
+        stackView.alignment = .fill
+        stackView.distribution = .equalSpacing
+        stackView.spacing = 0
+        
+        menuItemViews.forEach {
+            var item = $0
+            
+            item.didHighlight = {
+                [weak self] in
+                self?.highlightChanged()
+            }
+        }
+        
+        applyTheme(theme)
+    }
+
     private func computePath(withParentView view: UIView, alignment: MenuView.Alignment) -> UIBezierPath {
         let localViewBounds: CGRect
         let lowerRectCorners: UIRectCorner
@@ -309,10 +406,18 @@ class MenuContents: UIView {
         }
         
         //We're rendering under the superview, so let's do that
-        titleLabel.snp.remakeConstraints {
-            make in
-            
-            make.center.equalTo(superview)
+        if titleLabel.superview != nil {
+            titleLabel.snp.remakeConstraints {
+                make in
+                
+                make.center.equalTo(superview)
+            }
+        }
+        
+        if imageView.superview != nil {
+            imageView.snp.remakeConstraints { make in
+                make.center.equalTo(superview)
+            }
         }
         
         scrollView.scrollIndicatorInsets = UIEdgeInsets(top: radius + 6, left: 0, bottom: 6, right: 0)
@@ -400,7 +505,7 @@ class MenuContents: UIView {
         titleLabel.textColor = theme.textColor
         effectView.effect = theme.blurEffect
         tintView.backgroundColor = theme.backgroundTint
-        
+        imageView.tintColor = theme.textColor
         shadowView.layer.shadowOpacity = theme.shadowOpacity
         shadowView.layer.shadowRadius = theme.shadowRadius
         shadowView.layer.shadowColor = theme.shadowColor.cgColor

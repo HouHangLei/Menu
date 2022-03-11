@@ -14,7 +14,7 @@ class ViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-       let menu = MenuView(image: UIImage(named: "vraaa"), theme: LightMenuTheme()) { [weak self] () -> [MenuItem] in
+        let menu =  MenuView(image: UIImage(named: "vraaa"), theme: LightMenuTheme(), maxHeight: 100) { [weak self] () -> [MenuItem] in
             return [
                 ShortcutMenuItem(name: "Undo", shortcut: (.command, "Z"), action: {
                     [weak self] in
@@ -40,14 +40,14 @@ class ViewController: UIViewController {
         view.addSubview(menu)
         
         menu.tintColor = .black
-        
         menu.snp.makeConstraints {
             make in
             
             make.center.equalToSuperview()
             
             //Menus don't have an intrinsic height
-            make.height.equalTo(40)
+            make.width.equalTo(88)
+            make.height.equalTo(44)
         }
     }
 

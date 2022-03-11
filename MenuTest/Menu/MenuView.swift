@@ -22,6 +22,8 @@ public class MenuView: UIView, MenuThemeable, UIGestureRecognizerDelegate {
     private let effectView = UIVisualEffectView(effect: UIBlurEffect(style: .light))
     private let feedback = UISelectionFeedbackGenerator()
     
+    private var contentsMaxHeight: Float = 300
+
     public var title: String {
         didSet {
             titleLabel.text = title
@@ -60,10 +62,11 @@ public class MenuView: UIView, MenuThemeable, UIGestureRecognizerDelegate {
         }
     }
     
-    public init(title: String, theme: MenuTheme, itemsSource: @escaping () -> [MenuItem]) {
+    public init(title: String, theme: MenuTheme, maxHeight: Float = 300, itemsSource: @escaping () -> [MenuItem]) {
         self.itemsSource = itemsSource
         self.title = title
         self.theme = theme
+        self.contentsMaxHeight = maxHeight
         
         super.init(frame: .zero)
         
@@ -140,12 +143,13 @@ public class MenuView: UIView, MenuThemeable, UIGestureRecognizerDelegate {
         }
     }
     
-    public init(image: UIImage?, theme: MenuTheme, itemsSource: @escaping () -> [MenuItem]) {
+    public init(image: UIImage?, theme: MenuTheme, maxHeight: Float = 300, itemsSource: @escaping () -> [MenuItem]) {
         self.itemsSource = itemsSource
         self.title = ""
         self.image = image
         self.theme = theme
-        
+        self.contentsMaxHeight = maxHeight
+
         super.init(frame: .zero)
         
         imageView.image = image
@@ -184,8 +188,8 @@ public class MenuView: UIView, MenuThemeable, UIGestureRecognizerDelegate {
         imageView.snp.makeConstraints {
             make in
             
-            make.left.right.equalToSuperview().inset(15)
-            make.centerY.equalToSuperview()
+//            make.left.right.equalToSuperview().inset(15)
+            make.center.equalToSuperview()
         }
         
         gestureBarView.layer.cornerRadius = 1.0
@@ -304,9 +308,9 @@ public class MenuView: UIView, MenuThemeable, UIGestureRecognizerDelegate {
         
         let contents: MenuContents
         if image != nil {
-            contents = MenuContents(image: image, items: itemsSource(), theme: theme)
+            contents = MenuContents(image: image, items: itemsSource(), theme: theme, maxHeight: CGFloat(contentsMaxHeight))
         }else {
-            contents = MenuContents(name: title, items: itemsSource(), theme: theme)
+            contents = MenuContents(name: title, items: itemsSource(), theme: theme, maxHeight: CGFloat(contentsMaxHeight))
         }
         
         for view in contents.stackView.arrangedSubviews {
